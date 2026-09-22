@@ -19,6 +19,14 @@ from PIL import Image
 from pathlib import Path
 from playwright.sync_api import sync_playwright
 
+sys.path.append(str(Path(__file__).resolve().parents[2]))
+try:
+    from bengali_cleaner import clean_bengali_text, normalize_board, clean_record_bengali_fields
+except ImportError:
+    def normalize_board(name, ssc_gpa=''): return name
+    def clean_bengali_text(text): return text
+    def clean_record_bengali_fields(r): return r
+
 sys.stdout.reconfigure(encoding="utf-8")
 
 BASE_URL = "https://ctgcollege.eshiksabd.com"
@@ -301,7 +309,7 @@ def parse_application_pdf(pdf_bytes):
             fields["ssc_roll"] = m.group(1)
             fields["ssc_reg"] = m.group(2)
             fields["ssc_year"] = m.group(5)
-            fields["ssc_board"] = m.group(6)
+            fields["ssc_board"] = normalize_board(m.group(6), m.group(7))
             fields["ssc_gpa"] = m.group(7)
 
         sub_lines = []
